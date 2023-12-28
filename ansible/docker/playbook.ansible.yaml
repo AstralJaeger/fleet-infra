@@ -1,0 +1,4 @@
+- name: Docker-ce setup
+  hosts: all
+  become: yes
+  tasks:

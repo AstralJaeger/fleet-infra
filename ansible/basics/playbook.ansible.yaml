@@ -1,0 +1,41 @@
+- name: Basic linux host setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      cache_valid_time: 3600
+
+    - name: Upgrade all apt packages
+      apt:
+        pgrade: 'yes'
+
+    - name: Install aptitude
+      apt:
+        name: aptitude
+        state: latest
+        update_cache: true
+    - name: Install Neovim
+      apt:
+        name: neovim
+        state: present
+
+    - name: Disable iptables
+      systemd:
+        name: iptables
+        enabled: no
+        state: stopped
+
+    - name: Install Tailscale
+      ansible.builtin.shell: |
+        curl -fsSL https://tailscale.com/install.sh | sh
+      args:
+        warn: false
+    
+    - name: Authenticate Tailscale
+      command: tailscale up --authkey "{{ tailscale_authkey }}"
+      environment:
+        PATH: "{{ ansible_env.PATH }}:/usr/sbin:/usr/bin"
+      args:
+        creates: /var/lib/tailscale/tailscaled.state
